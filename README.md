@@ -17,7 +17,6 @@ Sistem presensi menggunakan face recognition yang dapat mendeteksi dan menyimpan
 .venv\Scripts\activate
 
 ### Jalankan
-```bash
 python fixed_attendance_system.py
 ```
 

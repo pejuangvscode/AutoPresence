@@ -136,8 +136,7 @@ class FixedAttendanceSystem:
             face_resized = cv2.resize(face_gray, (100, 100))
             label, confidence = self.recognizer.predict(face_resized)
             
-            # Confidence threshold (lower is better for LBPH)
-            if confidence < 80:  # Lebih ketat untuk menghindari false positive
+            if confidence < 80:
                 if 0 <= label < len(self.known_names):
                     return self.known_names[label], confidence
             
@@ -150,13 +149,8 @@ class FixedAttendanceSystem:
     def normalize_face(self, face_gray):
         """Normalisasi wajah untuk mengurangi pengaruh rotasi dan pencahayaan"""
         try:
-            # Resize ke ukuran standar
             face_resized = cv2.resize(face_gray, (100, 100))
-            
-            # Histogram equalization untuk normalisasi pencahayaan
             face_normalized = cv2.equalizeHist(face_resized)
-            
-            # Gaussian blur untuk mengurangi noise
             face_smoothed = cv2.GaussianBlur(face_normalized, (3, 3), 0)
             
             return face_smoothed
@@ -173,7 +167,6 @@ class FixedAttendanceSystem:
             h, w = face_gray.shape
             center = (w // 2, h // 2)
             
-            # Generate rotasi -15, -10, -5, 5, 10, 15 derajat
             angles = [-15, -10, -5, 5, 10, 15]
             
             for angle in angles:
@@ -214,9 +207,7 @@ class FixedAttendanceSystem:
                             correlation = cv2.matchTemplate(rotated_face, existing_face, cv2.TM_CCOEFF_NORMED)
                             similarity = np.max(correlation)
                             max_similarity = max(max_similarity, similarity)
-                            
-                            # Structural Similarity Index (SSIM) sebagai backup
-                            # Convert to float untuk SSIM calculation
+
                             face1_float = rotated_face.astype(np.float64)
                             face2_float = existing_face.astype(np.float64)
                             
@@ -234,8 +225,8 @@ class FixedAttendanceSystem:
                         except Exception as e:
                             continue
                     
-                    # Threshold yang lebih ketat untuk similarity
-                    if max_similarity > 0.65:  # Turunkan dari 0.7 ke 0.65
+                    # Threshold untuk similarity
+                    if max_similarity > 0.65:
                         print(f"Wajah mirip dengan {name} (similarity: {max_similarity:.3f})")
                         return True, name
             
@@ -311,9 +302,9 @@ def main():
     
     # Untuk tracking deteksi stabil
     detection_counter = {}
-    min_detection_count = 8  # Increase untuk deteksi lebih stabil
+    min_detection_count = 8
     last_attendance = {}
-    attendance_cooldown = 10  # seconds
+    attendance_cooldown = 10
     
     try:
         while True:
@@ -329,10 +320,10 @@ def main():
             # Deteksi wajah dengan parameter yang lebih stabil
             faces = system.face_cascade.detectMultiScale(
                 gray,
-                scaleFactor=1.05,      # Lebih kecil untuk deteksi lebih halus
-                minNeighbors=8,        # Lebih tinggi untuk mengurangi false positive
-                minSize=(60, 60),      # Ukuran minimum lebih besar
-                maxSize=(300, 300),    # Batasi ukuran maksimum
+                scaleFactor=1.05,
+                minNeighbors=8,
+                minSize=(60, 60),
+                maxSize=(300, 300),
                 flags=cv2.CASCADE_SCALE_IMAGE
             )
             
@@ -365,10 +356,9 @@ def main():
                         color = (0, 255, 255)  # Kuning untuk wajah yang mirip
                     else:
                         # Wajah benar-benar baru - hitung deteksi
-                        # Gunakan center position untuk tracking yang lebih stabil
                         center_x = x + w // 2
                         center_y = y + h // 2
-                        face_key = f"face_{center_x//50}_{center_y//50}"  # Grid-based tracking
+                        face_key = f"face_{center_x//50}_{center_y//50}"
                         
                         if face_key not in detection_counter:
                             detection_counter[face_key] = 0
@@ -431,13 +421,11 @@ def main():
             
             # Clean detection counter dengan cara yang lebih pintar
             if len(faces) == 0:
-                # Kurangi semua counter jika tidak ada wajah terdeteksi
                 for key in list(detection_counter.keys()):
                     detection_counter[key] -= 1
                     if detection_counter[key] <= 0:
                         del detection_counter[key]
             else:
-                # Hapus counter yang tidak aktif (tidak ada wajah di area tersebut)
                 active_keys = []
                 for (x, y, w, h) in faces:
                     center_x = x + w // 2
@@ -452,7 +440,6 @@ def main():
                         if detection_counter[key] <= 0:
                             del detection_counter[key]
             
-            # Tambahkan info di frame
             cv2.putText(frame, "PRESENSI OTOMATIS", (10, 30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             cv2.putText(frame, f"Database: {len(system.known_names)} orang", (10, 60), 
@@ -470,7 +457,6 @@ def main():
             if key == ord('q'):
                 break
             elif key == ord('r'):
-                # Reset detection counter jika user tekan 'r'
                 detection_counter = {}
                 print("Detection counter direset")
                 

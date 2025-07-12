@@ -16,12 +16,11 @@ Sistem presensi menggunakan face recognition yang dapat mendeteksi dan menyimpan
 # Aktifkan virtual environment
 .venv\Scripts\activate
 
-### 2. Jalankan
-```bash
+### Jalankan
 python fixed_attendance_system.py
 ```
 
-### 3. Operasi
+### 2. Penggunaan
 - Posisikan wajah di depan kamera
 - Tunggu deteksi stabil (8 frame)
 - Wajah baru akan disimpan otomatis sebagai person_X
